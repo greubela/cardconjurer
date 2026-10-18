@@ -160,7 +160,12 @@ var Hearthstone = window.Hearthstone || (() => {
             add(state.dragon&&state.rarity==='legendary','Legendary Dragon ('+kind+'-dragon)',kind+'-dragon');
             // addFrame's loading API creates images/UI; the caller owns array order.
             card.frames=[...layers.reverse().map(f=>({...f,masks:[]})),...retained];
-            for(const f of card.frames.slice().reverse()) await addFrame([],f);
+            for(const f of card.frames.slice().reverse()) {
+                await addFrame([],f);
+                // The stock loader redraws on every image event. Assemble once
+                // after all parts decode, then restore normal interactive redraw.
+                f.image.onload=()=>{if(!busy) drawFrames();};
+            }
             await Promise.all(card.frames.map(f=>f.image.decode().catch(()=>{})));
             drawFrames();
         } finally {busy=false;button.disabled=false;}
