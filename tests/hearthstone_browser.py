@@ -170,6 +170,8 @@ async def main():
             saveCard({key:'Hearthstone Browser Test',data});
         }''')
         saved=await page.evaluate('JSON.parse(localStorage.getItem("Hearthstone Browser Test"))')
+        # Exact art-pose transport metadata is consumed by the extension on load.
+        saved['hearthstone'].pop('savedArt',None)
         # A fresh page verifies font and onload initialization from an MtG session.
         fresh=await context.new_page();fresh.on('pageerror',lambda e:errors.append(str(e)))
         await ready(fresh)

@@ -4,12 +4,24 @@ var Hearthstone = window.Hearthstone || (() => {
     const classes = ['neutral','deathknight','demonhunter','druid','hunter','mage','paladin','priest','rogue','shaman','warlock','warrior'];
     const labels = {deathknight:'Death Knight', demonhunter:'Demon Hunter'};
     const label = value => labels[value] || value[0].toUpperCase()+value.slice(1);
-    const defaults = {class:'neutral', rarity:'none', bleed:false, body:true, portrait:true, scroll:true, name:true, mana:true, power:true, toughness:true, type:true, dragon:true};
+    const defaults = {tier:true,level:'1',class:'neutral', rarity:'none', bleed:false, body:true, portrait:true, scroll:true, name:true, mana:true, power:true, toughness:true, type:true, dragon:true};
+    const types = {
+        minion:{name:'Minions',pack:'HearthstoneMinion',frame:'minion',left:'Power',right:'Toughness',rightKey:'toughness',type:true,mana:'mana-crystal',leftIcon:'power-symbol',rightIcon:'toughness-symbol',art:[117,67,228,316],rules:[116,423,270,124]},
+        spell:{name:'Spells',pack:'HearthstoneSpell',frame:'spell',type:true,mana:'mana-crystal',art:[84,112,291,240],rules:[116,435,270,112]},
+        weapon:{name:'Weapons',pack:'HearthstoneWeapon',frame:'weapon',left:'Attack',right:'Durability',rightKey:'durability',type:true,typeDefault:false,mana:'mana-crystal',leftIcon:'weapon-power-symbol',rightIcon:'durability-symbol',art:[105,96,255,256],rules:[116,430,270,120],rulesColor:'white'},
+        hero:{name:'Heroes',pack:'HearthstoneHero',frame:'hero',right:'Armor',rightKey:'armor',mana:'mana-crystal',rightIcon:'armor-symbol',art:[124,86,213,244],rules:[116,420,270,128]},
+        location:{name:'Locations',pack:'HearthstoneLocation',frame:'location',right:'Durability',rightKey:'durability',mana:'location-mana-crystal',rightIcon:'location-durability-symbol',art:[67,66,326,281],rules:[116,442,270,120]},
+        'hero-power':{name:'Hero Powers',pack:'HearthstoneHeroPower',frame:'hero-power',universal:true,noRarity:true,mana:'hero-power-mana-crystal',art:[158,142,149,139],rules:[116,424,270,130]},
+        'battleground-minion':{name:'Battlegrounds Minions',pack:'HearthstoneBattlegroundMinion',frame:'minion',left:'Power',right:'Toughness',rightKey:'toughness',type:true,tier:true,leftIcon:'power-symbol',rightIcon:'toughness-symbol',art:[117,67,228,316],rules:[116,423,270,124]}
+    };
+    const packs=Object.values(types).map(t=>({name:'Hearthstone '+t.name,value:t.pack}));
+    const profile=k=>types[k];
+    const classPart=(k,c,part)=>profile(k).universal?'hero-power-'+part:c+'-'+profile(k).frame+'-'+part;
     let kind = 'minion';
     let busy = false;
     let fontPromise;
     const frame = (name, file, extra={}) => ({name, src:root+file+'.png', hearthstone:true, ...extra});
-    const background = k => frame('Hearthstone Black Surround / Bleed', k+'-black-surround', {
+    const background = k => frame('Hearthstone Black Surround / Bleed', profile(k).frame+'-black-surround', {
         bounds:{x:-0.05,y:-1/28,width:1.1,height:15/14}
     });
     function fonts() {
@@ -86,6 +98,27 @@ var Hearthstone = window.Hearthstone || (() => {
         context.restore();
     };
     function nameOptions(k) {
+        if(k==='battleground-minion') k='minion';
+        if(!['minion','spell'].includes(k)) {
+            const definitions={
+                weapon:{ratio:370/514,x:65,y:323,bannerX:87,bannerY:468,middle:0.56,max:450,points:[[18,56],[66,56],[400,56],[456,56]]},
+                hero:{ratio:353/490,x:73.5,y:316,bannerX:91,bannerY:458,middle:0.5,max:420,points:[[24,98],[170,36],[294,36],[438,96]]},
+                'hero-power':{ratio:0.7,x:0,y:0,bannerX:0,bannerY:0,middle:0.54,max:440,points:[[10,37],[110,37],[350,37],[450,37]]}
+            };
+            if(k==='location') return {
+                x:60/460,y:311/644,width:350/460,height:85/644,size:30/644,
+                font:'hearthstone-name',outlineColor:'black',rotation:0,
+                hearthstoneCurve:{version:2,middle:0.5,maxWidth:0.94,points:[[0,0.4],[0.3,0.85],[0.7,0.85],[1,0.45]]}
+            };
+            const t=definitions[k],r=t.ratio;
+            return {
+                x:(k==='hero-power'?15.5+105*r-20:t.x+(105-t.bannerX)*r-20)/460,
+                y:(k==='hero-power'?452*r:t.y+(452-t.bannerY)*r)/644,
+                width:460*r/460,height:160*r/644,size:44*r/644,
+                font:'hearthstone-name',outlineColor:'black',rotation:0,
+                hearthstoneCurve:{version:2,middle:t.middle,maxWidth:t.max/460,points:t.points.map(([x,y])=>[x/460,y/160])}
+            };
+        }
         // Map Sunwell's 460x160 name path box into the existing CardForge ribbon.
         // The asymmetric minion path is intentionally different from the spell.
         const minion=k==='minion';
@@ -103,9 +136,11 @@ var Hearthstone = window.Hearthstone || (() => {
     const settings = () => {
         const state={...defaults, ...(card.hearthstone || {})};
         if(state.kind && state.kind!==kind) {
-            state.power=kind==='minion';
-            state.toughness=kind==='minion';
+            const t=profile(kind);
+            state.power=!!t.left;state.toughness=!!t.right;state.dragon=!t.noRarity;
+            state.mana=!!t.mana;state.tier=!!t.tier;state.type=!!t.type && t.typeDefault!==false;
         }
+        if(profile(kind).noRarity) state.rarity='none';
         return state;
     };
     function showControls() {
@@ -121,13 +156,14 @@ var Hearthstone = window.Hearthstone || (() => {
                     <label>Class<select id="hs-class" class="input" aria-label="Hearthstone class">${classes.map(c=>`<option value="${c}">${label(c)}</option>`).join('')}</select></label>
                     <label>Rarity<select id="hs-rarity" class="input" aria-label="Hearthstone rarity">${['none','common','rare','epic','legendary'].map(r=>`<option value="${r}">${label(r)}</option>`).join('')}</select></label>
                 </div>
+                <label id="hs-level-label">Tavern tier<select id="hs-level" class="input" aria-label="Tavern tier">${[1,2,3,4,5,6].map(n=>`<option value="${n}">Tier ${n}</option>`).join('')}</select></label>
                 <div class="input-grid margin-bottom">${[
                     ['body','Class body'],['portrait','Art border'],['scroll','Text scroll'],['name','Name ribbon'],
                     ['mana','Mana crystal'],['power','Power symbol'],['toughness','Toughness symbol'],
-                    ['type','Type indicator'],['dragon','Legendary dragon'],['bleed','1/8-inch black margins']
+                    ['type','Type indicator'],['tier','Tavern tier badge'],['dragon','Legendary dragon'],['bleed','1/8-inch black margins']
                 ].map(([id,text])=>`<label><input id="hs-${id}" type="checkbox"> ${text}</label>`).join('')}</div>
                 <button id="hs-build" class="input">Build / replace Hearthstone layers</button>
-                <p class="input-description">Build a complete card, then edit or remove each layer below. Class and component changes apply when you build. Text and art are preserved. Use the Text tab for cost, power, toughness and type (e.g. Beast). MtG codes such as {t}, {w}, {u} and {b} work in rules text.</p>`;
+                <p class="input-description">Build a complete card, then edit or remove each layer below. Class and component changes apply when you build. Text and art are preserved. Hero Powers use the game's universal frame. Use the Text tab for cost, power, toughness and type (e.g. Beast). MtG codes such as {t}, {w}, {u} and {b} work in rules text.</p>`;
             document.querySelector('#creator-menu-frame > div').after(panel);
             panel.querySelector('#hs-build').onclick = build;
             document.querySelector('#selectFrameGroup').addEventListener('change', () => {
@@ -140,13 +176,19 @@ var Hearthstone = window.Hearthstone || (() => {
             const input = document.getElementById('hs-'+key);
             if (input.type==='checkbox') input.checked=state[key];
             else input.value=state[key];
+            const t=profile(kind);
+            const supported={power:!!t.left,toughness:!!t.right,type:!!t.type,mana:!!t.mana,tier:!!t.tier,rarity:!t.noRarity,dragon:!t.noRarity};
+            if(key in supported) {
+                input.disabled=!supported[key];
+                if(input.type==='checkbox' && input.disabled) input.checked=false;
+                input.parentElement.style.opacity=input.disabled?'0.5':'1';
+            }
             if(key==='power' || key==='toughness') {
-                input.disabled=kind==='spell';
-                if(kind==='spell') input.checked=false;
-                input.parentElement.style.opacity=kind==='spell'?'0.5':'1';
-                input.parentElement.title=kind==='spell'?'Minion components; select the Minions pack to use these.':'';
+                const text=key==='power'?t.left:t.right;
+                input.parentElement.lastChild.textContent=' '+(text|| (key==='power'?'Power':'Right stat'))+' symbol';
             }
         });
+        document.getElementById('hs-level-label').hidden=!profile(kind).tier;
         return panel;
     }
     function readControls() {
@@ -163,15 +205,16 @@ var Hearthstone = window.Hearthstone || (() => {
         await resetCardIrregularities({canvas:[getStandardWidth(),getStandardHeight(),bleed?0.05:0,bleed?1/28:0]});
         card.version = 'hearthstone-'+k;
         card.onload = '/js/frames/hearthstone.js';
+        const t=profile(k);
+        if(t.noRarity) state={...state,rarity:'none'};
         card.hearthstone = {...state,kind:k};
         card.margins = bleed;
         card.noCorners = true;
         document.getElementById('rounded-corners').checked = false;
         card.showsFlavorBar = false;
         drawTextBetweenFrames = false;
-        card.artBounds = k==='minion'
-            ? {x:117/460,y:67/644,width:228/460,height:316/644}
-            : {x:94/460,y:83/644,width:278/460,height:310/644};
+        // One native pixel under the frame avoids subpixel gaps at print/preview scales.
+        card.artBounds={x:(t.art[0]-1)/460,y:(t.art[1]-1)/644,width:(t.art[2]+2)/460,height:(t.art[3]+2)/644};
         autoFitArt();
         card.setSymbolBounds={x:-1,y:-1,width:0.01,height:0.01};
         resetSetSymbol();
@@ -184,33 +227,48 @@ var Hearthstone = window.Hearthstone || (() => {
             title:{name:'Title',text:'',...display,...nameOptions(k)},
             mana:box('Mana cost',45,67,88,75,65,display),
             type:box('Type / tribe',153,572,204,29,21,display),
-            rules:box('Rules Text',116,k==='minion'?423:435,270,k==='minion'?124:112,27,{font:'hearthstone-rules',align:'center',justify:'center',lineSpacing:0.05}),
+            rules:box('Rules Text',...t.rules,27,{font:'hearthstone-rules',color:t.rulesColor||'black',align:'center',justify:'center',lineSpacing:0.05}),
             power:box('Power',44,540,90,78,57,display),
             toughness:box('Toughness',366,540,80,78,57,display)
         };
-        if(k==='spell') {delete textOptions.power;delete textOptions.toughness;}
+        if(!t.left) delete textOptions.power;
+        else textOptions.power.name=t.left;
+        if(!t.right) delete textOptions.toughness;
+        else {
+            textOptions.toughness.name=t.right;
+            if(t.rightKey!=='toughness') {textOptions[t.rightKey]=textOptions.toughness;delete textOptions.toughness;}
+        }
+        if(!t.type || !state.type) delete textOptions.type;
+        if(k==='weapon' && textOptions.type) textOptions.type.y=560/644;
+        if(t.tier) delete textOptions.mana;
+        if(k==='hero-power') textOptions.mana=box('Mana cost',217,53,70,60,45,display);
+        if(k==='location') textOptions.mana.y=76/644;
         loadTextOptions(textOptions);
-        if(oldPT && k==='minion') {card.text.power.text=oldPT[1].trim();card.text.toughness.text=oldPT[2].trim();}
+        if(oldPT && ['minion','battleground-minion'].includes(k)) {card.text.power.text=oldPT[1].trim();card.text.toughness.text=oldPT[2].trim();}
         await loadBottomInfo({credit:{text:'{elemidinfo-artist}',x:0.12,y:0.97,width:0.76,height:0.018,size:0.013,font:'mplantin',color:'white',align:'center',oneLine:true}});
         drawFrames();
     }
     function loadPack(k, restoring=false) {
         kind=k;
         showControls();
+        const t=profile(k),base=t.frame;
         availableFrames = [
             ...classes.flatMap(c=>[
-                frame(label(c)+' '+label(k)+' Class Body',c+'-'+k+'-body'),
-                frame(label(c)+' '+(k==='minion'?'Oval Art Border':'Spell Art Border'),c+'-'+k+'-portrait')
+                frame(label(c)+' '+t.name+' Class Body',classPart(k,c,'body')),
+                frame(label(c)+' Art Border',classPart(k,c,'portrait'))
             ]),
-            frame('Mana Crystal','mana-crystal'),
-            frame('Text Scroll',k+'-description-area'),
-            frame('Name Ribbon',k+'-name'),
-            frame('Power Symbol (Sword)','power-symbol'),
-            frame('Toughness Symbol (Health)','toughness-symbol'),
-            frame('Type Indicator',k+'-kind'),
-            frame('Legendary Dragon ('+k+'-dragon)',k+'-dragon'),
-            frame('Rarity Socket',k+'-rarity-mask'),
-            ...['common','rare','epic','legendary'].map(r=>frame(label(r)+' Rarity Gem',k+'-'+r)),
+            ...(t.mana?[frame('Mana Crystal',t.mana)]:[]),
+            frame('Text Scroll',base+'-description-area'),
+            frame('Name Ribbon',base+'-name'),
+            ...(t.left?[frame(t.left+' Symbol',t.leftIcon)]:[]),
+            ...(t.right?[frame(t.right+' Symbol',t.rightIcon)]:[]),
+            ...(t.type?[frame('Type Indicator',base+'-kind')]:[]),
+            ...(t.tier?[1,2,3,4,5,6].map(n=>frame('Tavern Tier '+n,'battleground-tier-'+n)):[]),
+            ...(!t.noRarity?[
+                frame('Legendary Dragon ('+base+'-dragon)',base+'-dragon'),
+                frame('Rarity Socket',base+'-rarity-mask'),
+                ...['common','rare','epic','legendary'].map(r=>frame(label(r)+' Rarity Gem',base+'-'+r))
+            ]:[]),
             background(k)
         ];
         document.querySelector('#loadFrameVersion').disabled=false;
@@ -226,7 +284,7 @@ var Hearthstone = window.Hearthstone || (() => {
         const button=document.getElementById('hs-build');
         button.disabled=true;
         try {
-            const state=readControls();
+            const state=readControls(),t=profile(kind),base=t.frame;
             await version(kind,state);
             // Retain other styles' layers: this action replaces only our own parts.
             const retained=card.frames.filter(f=>!f.hearthstone);
@@ -234,19 +292,20 @@ var Hearthstone = window.Hearthstone || (() => {
             document.getElementById('frame-list').innerHTML='';
             const layers=[background(kind)];
             const add=(enabled,name,file)=>{if(enabled) layers.push(frame(name,file));};
-            add(state.body,label(state.class)+' Class Body',state.class+'-'+kind+'-body');
-            add(state.portrait,label(state.class)+' Art Border',state.class+'-'+kind+'-portrait');
-            add(state.scroll,'Text Scroll',kind+'-description-area');
-            if(state.rarity!=='none') {
-                add(true,'Rarity Socket',kind+'-rarity-mask');
-                add(true,label(state.rarity)+' Rarity Gem',kind+'-'+state.rarity);
+            add(state.body,label(state.class)+' Class Body',classPart(kind,state.class,'body'));
+            add(state.portrait,label(state.class)+' Art Border',classPart(kind,state.class,'portrait'));
+            add(state.scroll,'Text Scroll',base+'-description-area');
+            if(state.rarity!=='none' && !t.noRarity) {
+                add(true,'Rarity Socket',base+'-rarity-mask');
+                add(true,label(state.rarity)+' Rarity Gem',base+'-'+state.rarity);
             }
-            add(state.name,'Name Ribbon',kind+'-name');
-            add(state.mana,'Mana Crystal','mana-crystal');
-            add(state.power&&kind==='minion','Power Symbol (Sword)','power-symbol');
-            add(state.toughness&&kind==='minion','Toughness Symbol (Health)','toughness-symbol');
-            add(state.type,'Type Indicator',kind+'-kind');
-            add(state.dragon&&state.rarity==='legendary','Legendary Dragon ('+kind+'-dragon)',kind+'-dragon');
+            add(state.name,'Name Ribbon',base+'-name');
+            add(state.mana&&t.mana,'Mana Crystal',t.mana);
+            add(state.power&&t.left,t.left+' Symbol',t.leftIcon);
+            add(state.toughness&&t.right,t.right+' Symbol',t.rightIcon);
+            add(state.type&&t.type,'Type Indicator',base+'-kind');
+            add(state.dragon&&!t.noRarity&&state.rarity==='legendary','Legendary Dragon ('+base+'-dragon)',base+'-dragon');
+            add(state.tier&&t.tier,'Tavern Tier '+state.level,'battleground-tier-'+state.level);
             // addFrame's loading API creates images/UI; the caller owns array order.
             card.frames=[...layers.reverse().map(f=>({...f,masks:[]})),...retained];
             for(const f of card.frames.slice().reverse()) {
@@ -259,10 +318,34 @@ var Hearthstone = window.Hearthstone || (() => {
             drawFrames();
         } finally {busy=false;button.disabled=false;}
     }
+    // The shared loader rounds art inputs when reconstructing bleed offsets.
+    // Save the exact pose alongside our settings, then consume it on restore so
+    // repeat loads cannot walk an artwork by one pixel at half-pixel margins.
+    const saveSharedCard=saveCard;
+    saveCard=function(fromFile) {
+        const target=fromFile?fromFile.data:card;
+        if(!target?.version?.startsWith('hearthstone-') || !target.hearthstone) return saveSharedCard(fromFile);
+        const previous=target.hearthstone.savedArt;
+        target.hearthstone.savedArt={x:target.artX,y:target.artY,zoom:target.artZoom,rotate:target.artRotate};
+        try {return saveSharedCard(fromFile);}
+        finally {
+            if(previous) target.hearthstone.savedArt=previous;
+            else delete target.hearthstone.savedArt;
+        }
+    };
     async function restore() {
         await fonts();
         if(!card.version.startsWith('hearthstone-')) return;
         kind=card.hearthstone?.kind || card.version.slice('hearthstone-'.length);
+        const pose=card.hearthstone?.savedArt;
+        if(pose) {
+            delete card.hearthstone.savedArt;
+            document.querySelector('#art-x').value=pose.x*card.width;
+            document.querySelector('#art-y').value=pose.y*card.height;
+            document.querySelector('#art-zoom').value=pose.zoom*100;
+            document.querySelector('#art-rotate').value=pose.rotate||0;
+            artEdited();
+        }
         // Upgrade prior default typography while retaining deliberate placement edits.
         if(card.text.title?.hearthstoneCurve?.version!==2) {
             const title=card.text.title,options=nameOptions(kind);
@@ -277,12 +360,12 @@ var Hearthstone = window.Hearthstone || (() => {
         document.querySelector('#selectFrameGroup').value='Hearthstone';
         showControls();
         const select=document.querySelector('#selectFramePack');
-        select.innerHTML='<option value="HearthstoneMinion">Hearthstone Minions</option><option value="HearthstoneSpell">Hearthstone Spells</option>';
-        select.value=kind==='spell'?'HearthstoneSpell':'HearthstoneMinion';
+        select.innerHTML=packs.map(p=>`<option value="${p.value}">${p.name}</option>`).join('');
+        select.value=profile(kind).pack;
         loadPack(kind,true);
         drawTextBuffer();
         drawFrames();
     }
-    return {showControls,loadPack,version,build,restore};
+    return {showControls,loadPack,version,build,restore,packs,types};
 })();
 if(card.version.startsWith('hearthstone-')) Hearthstone.restore();

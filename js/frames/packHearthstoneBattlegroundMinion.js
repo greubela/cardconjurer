@@ -1,0 +1,1 @@
+Hearthstone.loadPack('battleground-minion');
