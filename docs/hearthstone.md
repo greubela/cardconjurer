@@ -57,9 +57,11 @@ margin geometry.
 
 ## Assets and implementation
 
-The only integration change outside the new extension remains the Hearthstone
-option in `creator/index.html`. The shared renderer, replacement engine, original
-frame classes and save implementation are unchanged.
+Outside the extension, changes are limited to the Hearthstone option in
+`creator/index.html` and resetting the active text-field index when loading a
+card in `js/creator-23.js`. That small guard prevents loading a layout with fewer
+text fields from crashing. The shared drawing and replacement engines and
+original frame classes are unchanged.
 
 Frames and components are adapted from
 [Vincent-the-gamer/CardForge](https://github.com/Vincent-the-gamer/cardforge),
@@ -99,6 +101,7 @@ Start the application server at localhost:4242, then run:
 ```sh
 python tests/hearthstone_matrix_browser.py
 python tests/hearthstone_names_browser.py
+python tests/hearthstone_type_names_browser.py
 python tests/hearthstone_browser.py --quick
 ```
 
@@ -108,7 +111,8 @@ checked at full print resolution. Checks include real asset loading, the correct
 text/stat fields, all six BG tier badges, full output opacity, every pixel of all
 four bleed strips, irregular trim corners, actual MtG symbol rendering, independent
 component removal, fresh-page save/reload, real PNG download and mobile controls.
-The separate name checks cover short and long titles and legacy save migration.
+The separate name checks cover short and long titles, legacy save migration,
+and monotonic glyph placement on every type's title path.
 The earlier general browser suite also checks the stock text/layer editors,
 generic margin workflow and switching back to regular MtG.
 

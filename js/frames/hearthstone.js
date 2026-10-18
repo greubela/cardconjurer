@@ -60,7 +60,7 @@ var Hearthstone = window.Hearthstone || (() => {
         let length=0;
         path.forEach((p,i)=>{if(i) length+=Math.hypot(p.x-path[i-1].x,p.y-path[i-1].y);p.distance=length;});
         const center=path[Math.round(curve.middle*1000)].distance;
-        const maxWidth=width*curve.maxWidth;
+        const maxWidth=Math.min(width*curve.maxWidth,2*Math.min(center,length-center));
         const letters=Array.from(new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(textObject.text),s=>s.segment);
         let size=scaleHeight(textObject.size)+parseInt(textObject.fontSize||0);
         let advances,total;

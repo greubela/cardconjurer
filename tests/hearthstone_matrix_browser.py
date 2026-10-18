@@ -150,7 +150,10 @@ async def main():
                 saveCard({key,data});
             }''','Matrix '+k)
             fresh=await context.new_page();fresh.on('pageerror',lambda e:errors.append(str(e)))
-            await ready(fresh);await fresh.evaluate('key=>loadCard(key)','Matrix '+k)
+            await ready(fresh)
+            # Reopening a smaller layout must work with the last MtG field selected.
+            await fresh.evaluate('selectedTextIndex=Object.keys(card.text).length-1')
+            await fresh.evaluate('key=>loadCard(key)','Matrix '+k)
             await fresh.wait_for_function("k=>typeof Hearthstone!=='undefined' && document.querySelector('#selectFramePack').value===Hearthstone.types[k].pack",arg=k)
             await settle(fresh)
             after=await snapshot(fresh)
