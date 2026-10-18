@@ -129,3 +129,16 @@ Browser screenshots: [all types](images/hearthstone-all-types.jpg),
 [Hero Powers](images/hearthstone-editor-hero-power.png),
 [Battlegrounds minions](images/hearthstone-editor-battleground-minion.png),
 [mobile controls](images/hearthstone-mobile-controls.png).
+
+The final matrix passed all **84 combinations**, all seven full-resolution
+save/reload and export checks, and all optional component-image decode checks,
+with **zero page errors and zero failed extension asset requests**. The existing
+editor/generic-margin/MtG regression suite passed as well.
+
+Class contact sheets: [Minions](images/hearthstone-minion-classes.jpg),
+[Spells](images/hearthstone-spell-classes.jpg),
+[Weapons](images/hearthstone-weapon-classes.jpg),
+[Heroes](images/hearthstone-hero-classes.jpg),
+[Locations](images/hearthstone-location-classes.jpg),
+[Hero Powers](images/hearthstone-hero-power-classes.jpg),
+[Battlegrounds Minions](images/hearthstone-battleground-minion-classes.jpg).
