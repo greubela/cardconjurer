@@ -24,6 +24,44 @@ var Hearthstone = window.Hearthstone || (() => {
         }
         return fontPromise;
     }
+    // Bend the normal text renderer's output along the ribbon. Keeping the
+    // initial render preserves its font sizing, outlines and MtG replacements.
+    // Only text boxes explicitly carrying our saved curve metadata use this.
+    const writeFlatText = writeText;
+    const nameCanvas = document.createElement('canvas');
+    writeText = function(textObject, targetContext) {
+        if(!textObject.hearthstoneCurve) return writeFlatText(textObject,targetContext);
+        if(nameCanvas.width!==targetContext.canvas.width || nameCanvas.height!==targetContext.canvas.height) {
+            nameCanvas.width=targetContext.canvas.width;
+            nameCanvas.height=targetContext.canvas.height;
+        }
+        const context=nameCanvas.getContext('2d');
+        context.clearRect(0,0,nameCanvas.width,nameCanvas.height);
+        writeFlatText({...textObject,rotation:0},context);
+        const x=scaleX(textObject.x), y=scaleY(textObject.y);
+        const width=scaleWidth(textObject.width), height=scaleHeight(textObject.height);
+        const rise=scaleHeight(textObject.hearthstoneCurve.rise);
+        const baseline=y+height*0.75;
+        const padding=scaleHeight(textObject.size)*0.5;
+        const top=Math.max(0,Math.floor(y-padding));
+        const bottom=Math.min(nameCanvas.height,Math.ceil(y+height+padding));
+        targetContext.save();
+        targetContext.translate(x,y);
+        targetContext.rotate((textObject.rotation||0)*Math.PI/180);
+        // Thin overlapping slices avoid hairline seams at print resolution.
+        for(let column=0;column<width;column+=2) {
+            const u=(column+1)/width;
+            const offset=rise*Math.pow(2*u-1,2);
+            const slope=4*rise*(2*u-1)/width;
+            targetContext.save();
+            targetContext.translate(column,baseline-y+offset);
+            targetContext.rotate(Math.atan(slope));
+            targetContext.drawImage(nameCanvas,x+column,top,Math.min(3,width-column),bottom-top,
+                0,top-baseline,Math.min(3,width-column),bottom-top);
+            targetContext.restore();
+        }
+        targetContext.restore();
+    };
     const settings = () => {
         const state={...defaults, ...(card.hearthstone || {})};
         if(state.kind && state.kind!==kind) {
@@ -105,7 +143,7 @@ var Hearthstone = window.Hearthstone || (() => {
         const display={font:'hearthstone-title',color:'white',outlineWidth:2/644,outlineColor:'#241c18',oneLine:true,align:'center'};
         const oldPT = !card.text?.power && card.text?.pt?.text.match(/^\s*([^/]+)\/([^/]+)\s*$/);
         const textOptions = {
-            title:box('Title',98,k==='minion'?337:343,302,45,29,{...display,rotation:-3}),
+            title:box('Title',98,k==='minion'?337:343,302,45,29,{...display,rotation:k==='minion'?-3:0,hearthstoneCurve:{rise:(k==='minion'?11:16)/644}}),
             mana:box('Mana cost',45,67,88,75,65,display),
             type:box('Type / tribe',153,572,204,29,21,display),
             rules:box('Rules Text',116,k==='minion'?423:435,270,k==='minion'?124:112,27,{font:'hearthstone-rules',align:'center',justify:'center',lineSpacing:0.05}),
@@ -187,6 +225,11 @@ var Hearthstone = window.Hearthstone || (() => {
         await fonts();
         if(!card.version.startsWith('hearthstone-')) return;
         kind=card.hearthstone?.kind || card.version.slice('hearthstone-'.length);
+        // Upgrade the original straight title while retaining edited placement.
+        if(card.text.title && !card.text.title.hearthstoneCurve) {
+            card.text.title.hearthstoneCurve={rise:(kind==='minion'?11:16)/644};
+            if(kind==='spell' && card.text.title.rotation===-3) card.text.title.rotation=0;
+        }
         // Loading a save must not reset text, component positions, art or margins.
         document.querySelector('#selectFrameGroup').value='Hearthstone';
         showControls();

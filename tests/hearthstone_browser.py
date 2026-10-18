@@ -91,6 +91,7 @@ async def main():
         await page.select_option('#selectFrameGroup','Hearthstone')
         await page.wait_for_function("card.version === 'hearthstone-minion'")
         await build(page)
+        assert await page.evaluate('card.text.title.hearthstoneCurve.rise>0')
         await page.evaluate(r'''async source => {
             uploadArt(source,'autoFit');await art.decode();autoFitArt();
             card.text.title.text='Keeper of the Grove';

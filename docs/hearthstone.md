@@ -17,7 +17,7 @@ oval portrait and `minion-dragon`; spells use the spell surround and
 uncheck it before building, or remove its layer afterwards.
 
 **Text** provides Title, Mana cost, Type / tribe (for example Beast or Nature),
-Rules Text and, for minions, separate Power and Toughness fields. Cost and stats
+Rules Text and, for minions, separate Power and Toughness fields. Names follow the curve of the minion or spell ribbon; normal text formatting and automatic shrinking for long names still apply. Existing Hearthstone saves acquire the curved title when reopened. Cost and stats
 accept plain numbers. Rules use the standard Card Conjurer replacement engine:
 `{t}`, `{untap}`, `{w}`, `{u}`, `{b}`, `{r}`, `{g}`, hybrid mana, `{bold}…{/bold}`,
 italics and other normal commands remain available. Existing title, cost, type,
@@ -87,3 +87,7 @@ Browser screenshots: [minion editor](images/hearthstone-editor-minion.png),
 [mobile controls](images/hearthstone-mobile-controls.png),
 [all minion classes](images/hearthstone-minion-classes.jpg),
 [all spell classes](images/hearthstone-spell-classes.jpg).
+
+Curved-name checks: `python tests/hearthstone_names_browser.py` verifies short and
+long names stay inside both ribbons, and that upgrading an older save retains
+its edited title placement. [Name screenshots](images/hearthstone-curved-names.jpg).
