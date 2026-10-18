@@ -48,5 +48,32 @@
     "page_errors": [],
     "failed_extension_requests": []
   },
-  "curved_name_checks": "PASS: short, normal and long names fit minion/spell ribbons; legacy saves retain edited title placement"
+  "curved_name_checks": "PASS: short, normal and long names fit minion/spell ribbons; legacy saves retain edited title placement",
+  "original_typography_run": {
+    "classes": 6,
+    "symbols": [
+      "t",
+      "g"
+    ],
+    "bleed": "1/8 inch; all four strips and trim corners opaque black",
+    "save_reload": "text, art, positions, layer opacity, settings preserved",
+    "png_download": [
+      2211,
+      3015
+    ],
+    "mobile_width": 390,
+    "page_errors": [],
+    "failed_extension_requests": []
+  },
+  "original_typography_checks": {
+    "font": "Belwe Bd BT Bold; verified embedded font metadata and browser font loading",
+    "references": [
+      "Keeper of the Grove (601)",
+      "Fireball (315)",
+      "HearthSim/Sunwell name paths"
+    ],
+    "glyphs": "Individually drawn and tangent-rotated; raster-strip deformation removed",
+    "short_long_names": "PASS on minion and spell ribbons",
+    "legacy_placement": "PASS"
+  }
 }
