@@ -31,6 +31,8 @@ var Hearthstone = window.Hearthstone || (() => {
             panel = document.createElement('div');
             panel.id = 'hearthstone-controls';
             panel.className = 'readable-background margin-bottom padding';
+            panel.style.fontFamily = 'gothammedium, sans-serif';
+            panel.style.lineHeight = '1.5';
             panel.innerHTML = `<h3>Hearthstone components</h3>
                 <div class="input-grid margin-bottom">
                     <label>Class<select id="hs-class" class="input" aria-label="Hearthstone class">${classes.map(c=>`<option value="${c}">${label(c)}</option>`).join('')}</select></label>
@@ -88,14 +90,18 @@ var Hearthstone = window.Hearthstone || (() => {
         resetWatermark();
         const box=(name,x,y,w,h,size,extra={})=>({name,text:'',x:(x-20)/460,y:y/644,width:w/460,height:h/644,size:size/644,...extra});
         const display={font:'hearthstone-title',color:'white',outlineWidth:2/644,outlineColor:'#241c18',oneLine:true,align:'center'};
-        loadTextOptions({
+        const oldPT = !card.text?.power && card.text?.pt?.text.match(/^\s*([^/]+)\/([^/]+)\s*$/);
+        const textOptions = {
             title:box('Title',98,k==='minion'?337:343,302,45,29,{...display,rotation:-3}),
             mana:box('Mana cost',45,67,88,75,65,display),
-            type:box('Type / tribe',153,557,204,29,21,display),
+            type:box('Type / tribe',153,572,204,29,21,display),
             rules:box('Rules Text',116,k==='minion'?423:435,270,k==='minion'?124:112,27,{font:'hearthstone-rules',align:'center',justify:'center',lineSpacing:0.05}),
-            power:box('Power',44,530,90,78,57,display),
-            toughness:box('Toughness',366,535,80,78,57,display)
-        });
+            power:box('Power',44,540,90,78,57,display),
+            toughness:box('Toughness',366,540,80,78,57,display)
+        };
+        if(k==='spell') {delete textOptions.power;delete textOptions.toughness;}
+        loadTextOptions(textOptions);
+        if(oldPT && k==='minion') {card.text.power.text=oldPT[1].trim();card.text.toughness.text=oldPT[2].trim();}
         await loadBottomInfo({credit:{text:'{elemidinfo-artist}',x:0.12,y:0.97,width:0.76,height:0.018,size:0.013,font:'mplantin',color:'white',align:'center',oneLine:true}});
         drawFrames();
     }

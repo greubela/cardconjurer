@@ -45,7 +45,7 @@ for kind in ('minion', 'spell'):
         body.putalpha(ImageChops.multiply(base.getchannel('A'), ImageChops.invert(surround)))
         # Remove the baked-in parchment: the clean text scroll is its own part.
         paper = Image.new('L', base.size, 255)
-        ImageDraw.Draw(paper).polygon([(92,414),(408,414),(417,594),(400,601),(100,601),(84,590),(84,425)], fill=0)
+        ImageDraw.Draw(paper).polygon([(100,420),(400,420),(400,585),(100,585)], fill=0)
         body.putalpha(ImageChops.multiply(body.getchannel('A'), paper))
         save(portrait, path.stem+'-portrait')
         save(body, path.stem+'-body')
