@@ -62,7 +62,7 @@ for kind in ('minion', 'spell'):
         'name': (323 if kind=='minion' else 316, 0),
         'description-area': (407,0) if kind=='minion' else (-20,-1),
         'kind': (546,7) if kind=='minion' else (-21,0),
-        'dragon': (21,50) if kind=='minion' else (49,68),
+        'dragon': (21,50) if kind=='minion' else (49,50),
         'rarity-mask': (370,13) if kind=='minion' else (379,0),
     }
     for part,(y,dx) in parts.items():

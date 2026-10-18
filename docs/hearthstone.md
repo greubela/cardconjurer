@@ -1,5 +1,7 @@
 # Hearthstone frames
 
+![Legendary minion and spell with MtG symbols and black bleed](images/hearthstone-preview.jpg)
+
 In **Frame → Other Games → Hearthstone**, choose **Hearthstone Minions** or
 **Hearthstone Spells**. Select a class, rarity and components, then click
 **Build / replace Hearthstone layers**. This assembles the card; choosing a frame
@@ -74,3 +76,14 @@ bleed strips, irregular trim corners, fresh-page save/reload, edited layer
 positions and opacity, generic margins, switching back to regular MtG, PNG
 download and mobile controls. Screenshots and results are written under
 `work/hearthstone-verification` (override with `--output`).
+
+The completed browser run passed all 24 variants with zero page errors or failed
+extension asset requests. A final focused run also exercised the actual text and
+frame editor inputs, rescanned the generic margins, and rechecked the adjusted
+spell dragon. See [recorded results](hearthstone-verification.json).
+
+Browser screenshots: [minion editor](images/hearthstone-editor-minion.png),
+[spell editor](images/hearthstone-editor-spell.png),
+[mobile controls](images/hearthstone-mobile-controls.png),
+[all minion classes](images/hearthstone-minion-classes.jpg),
+[all spell classes](images/hearthstone-spell-classes.jpg).

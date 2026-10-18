@@ -19,6 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--url', default='http://localhost:4242/')
 parser.add_argument('--output', default='work/hearthstone-verification')
 parser.add_argument('--art', type=Path)
+parser.add_argument('--quick', action='store_true', help='Recheck Neutral, Druid and Mage plus every behavior check')
 args = parser.parse_args()
 out = Path(args.output)
 out.mkdir(parents=True, exist_ok=True)
@@ -66,10 +67,10 @@ async def export(page,name):
     return Image.open(io.BytesIO(raw)).convert('RGBA')
 
 
-def black_edges(im):
+def black_edges(im, margin_x=.05, margin_y=1/28):
     # Scan every pixel in all four bleed strips, plus irregular trim corners.
     w,h=im.size
-    mx=round(2010*.05);my=round(2814/28)
+    mx=round(2010*margin_x);my=round(2814*margin_y)
     for crop in [(0,0,w,my-1),(0,h-my+1,w,h),(0,0,mx-1,h),(w-mx+1,0,w,h)]:
         extrema=im.crop(crop).getextrema()
         assert extrema == ((0,0),(0,0),(0,0),(255,255)), (crop,extrema)
@@ -121,7 +122,7 @@ async def main():
                 await page.wait_for_function("card.version==='hearthstone-spell'")
                 await page.evaluate("card.text.title.text='Grovefire';card.text.type.text='Nature';card.text.rules.text='Deal 3 damage.\\n{t}: Add {r}{g}.'")
             tiles=[]
-            for cls in classes:
+            for cls in (['neutral','druid','mage'] if args.quick else classes):
                 await build(page,cls,'legendary',True)
                 assert await page.evaluate('card.frames.every(f=>f.image.complete&&f.image.naturalWidth>0)')
                 assert await page.evaluate("card.frames.some(f=>f.name.includes('Dragon'))")
@@ -137,7 +138,7 @@ async def main():
                 grid.paste(im,(x+10,y),im);d.text((x+12,y+388),cls,fill='white')
             grid.save(out/(kind+'-classes.jpg'),quality=92)
             grids[kind]=grid
-            print('Verified all 12',kind,'classes and full black bleed',flush=True)
+            print('Verified',len(tiles),kind,'classes and full black bleed',flush=True)
         # Disabling components excludes precisely those layers, preserving rules.
         for key in ['mana','scroll','type','dragon']:
             await page.locator('#hs-'+key).uncheck()
@@ -147,10 +148,21 @@ async def main():
         for key in ['mana','scroll','type','dragon']:
             await page.locator('#hs-'+key).check()
         await build(page,'mage','legendary',True)
+        # Exercise the existing text and frame editors through real UI inputs.
+        await page.locator('#creator-menu-tabs h3').filter(has_text='Text').click()
+        await page.locator('#text-options h4').filter(has_text='Title').click()
+        await page.locator('#text-editor').fill('Saved Grovefire')
+        assert await page.evaluate("card.text.title.text==='Saved Grovefire'")
+        await page.locator('#creator-menu-tabs h3').filter(has_text='Frame').click()
+        await page.locator('#frame-list .frame-element').first.click()
+        await page.locator('#frame-editor-x').fill('8')
+        await page.locator('#frame-editor-x').dispatch_event('change')
+        await page.locator('#frame-editor-opacity').fill('93')
+        await page.locator('#frame-editor-opacity').dispatch_event('change')
+        await page.locator('.frame-element-editor-close').click()
+        assert await page.evaluate('card.frames[0].opacity==93 && card.frames[0].bounds.x===8/card.width')
         # Manual frame layer editing: bounds and opacity survive save/reload.
         await page.evaluate('''() => {
-            card.frames[0].bounds={x:0.004,y:0,width:0.992,height:1};
-            card.frames[0].opacity=93;
             card.text.title.x+=0.003;
             const data=JSON.parse(JSON.stringify(card));
             data.frames.forEach(f=>{delete f.image;f.masks.forEach(m=>delete m.image)});
@@ -175,7 +187,7 @@ async def main():
         await fresh.wait_for_function('card.marginX===0.044')
         await settle(fresh)
         assert await fresh.evaluate("card.version==='hearthstone-spell'")
-        await export(fresh,'generic-margin-spell')
+        black_edges(await export(fresh,'generic-margin-spell'), .044, 1/35)
         # Return to the regular MtG pack and exercise its existing text layout.
         await fresh.select_option('#selectFrameGroup','Standard-3')
         await fresh.wait_for_function("card.version==='m15Regular'")
@@ -194,7 +206,7 @@ async def main():
         await fresh.select_option('#selectFramePack','HearthstoneMinion')
         await fresh.wait_for_function("card.version==='hearthstone-minion'")
         await build(fresh,'druid','legendary',True)
-        await fresh.evaluate("card.text.title.text='Keeper of the Grove';card.text.type.text='Beast';card.text.rules.text='{bold}Choose One —{/bold}\\nDeal 2 damage; or\\n{t}: Add {g}{g}.'")
+        await fresh.evaluate("card.text.title.text='Keeper of the Grove';card.text.type.text='Beast';card.text.power.text='2';card.text.toughness.text='4';card.text.rules.text='{bold}Choose One —{/bold}\\nDeal 2 damage; or\\n{t}: Add {g}{g}.'")
         await settle(fresh)
         await fresh.screenshot(path=str(out/'editor-minion.png'))
         black_edges(await export(fresh,'legendary-minion'))
@@ -206,8 +218,9 @@ async def main():
         await fresh.screenshot(path=str(out/'mobile-controls.png'))
         assert not errors, errors
         assert not failed, failed
-        (out/'results.json').write_text(json.dumps({'classes':24,'symbols':['t','g'],'bleed':'1/8 inch; all four strips and trim corners opaque black','save_reload':'text, art, positions, layer opacity, settings preserved','png_download':[2211,3015],'mobile_width':390,'page_errors':errors,'failed_extension_requests':failed},indent=2))
+        (out/'results.json').write_text(json.dumps({'classes':6 if args.quick else 24,'symbols':['t','g'],'bleed':'1/8 inch; all four strips and trim corners opaque black','save_reload':'text, art, positions, layer opacity, settings preserved','png_download':[2211,3015],'mobile_width':390,'page_errors':errors,'failed_extension_requests':failed},indent=2))
         await browser.close()
-    print('PASS: browser visuals, 24 class variants, components, MtG symbols, bleed, save/reload, download, mobile and regular MtG switch',flush=True)
+    print('PASS: browser visuals,',6 if args.quick else 24,'class variants, components, MtG symbols, bleed, save/reload, download, mobile and regular MtG switch',flush=True)
 
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())

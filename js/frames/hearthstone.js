@@ -24,7 +24,14 @@ var Hearthstone = window.Hearthstone || (() => {
         }
         return fontPromise;
     }
-    const settings = () => ({...defaults, ...(card.hearthstone || {})});
+    const settings = () => {
+        const state={...defaults, ...(card.hearthstone || {})};
+        if(state.kind && state.kind!==kind) {
+            state.power=kind==='minion';
+            state.toughness=kind==='minion';
+        }
+        return state;
+    };
     function showControls() {
         let panel = document.getElementById('hearthstone-controls');
         if (!panel) {
@@ -57,6 +64,12 @@ var Hearthstone = window.Hearthstone || (() => {
             const input = document.getElementById('hs-'+key);
             if (input.type==='checkbox') input.checked=state[key];
             else input.value=state[key];
+            if(key==='power' || key==='toughness') {
+                input.disabled=kind==='spell';
+                if(kind==='spell') input.checked=false;
+                input.parentElement.style.opacity=kind==='spell'?'0.5':'1';
+                input.parentElement.title=kind==='spell'?'Minion components; select the Minions pack to use these.':'';
+            }
         });
         return panel;
     }
