@@ -16,6 +16,7 @@ var Hearthstone = window.Hearthstone || (() => {
         if (!fontPromise) {
             fontPromise = Promise.all([
                 ['hearthstone-title','GBJenLei-Medium.woff2'],
+                ['hearthstone-name','Belwe-Bold.ttf'],
                 ['hearthstone-rules','FranklinGothic-MediumCond.woff2']
             ].map(async ([name,file]) => {
                 const font = new FontFace(name, `url(/fonts/hearthstone/${file})`);
@@ -24,44 +25,81 @@ var Hearthstone = window.Hearthstone || (() => {
         }
         return fontPromise;
     }
-    // Bend the normal text renderer's output along the ribbon. Keeping the
-    // initial render preserves its font sizing, outlines and MtG replacements.
-    // Only text boxes explicitly carrying our saved curve metadata use this.
+    // Original-style names use Belwe and individually rotated glyphs on the
+    // minion/spell cubic paths documented by HearthSim/Sunwell (MIT).
     const writeFlatText = writeText;
-    const nameCanvas = document.createElement('canvas');
-    writeText = function(textObject, targetContext) {
-        if(!textObject.hearthstoneCurve) return writeFlatText(textObject,targetContext);
-        if(nameCanvas.width!==targetContext.canvas.width || nameCanvas.height!==targetContext.canvas.height) {
-            nameCanvas.width=targetContext.canvas.width;
-            nameCanvas.height=targetContext.canvas.height;
-        }
-        const context=nameCanvas.getContext('2d');
-        context.clearRect(0,0,nameCanvas.width,nameCanvas.height);
-        writeFlatText({...textObject,rotation:0},context);
-        const x=scaleX(textObject.x), y=scaleY(textObject.y);
-        const width=scaleWidth(textObject.width), height=scaleHeight(textObject.height);
-        const rise=scaleHeight(textObject.hearthstoneCurve.rise);
-        const baseline=y+height*0.75;
-        const padding=scaleHeight(textObject.size)*0.5;
-        const top=Math.max(0,Math.floor(y-padding));
-        const bottom=Math.min(nameCanvas.height,Math.ceil(y+height+padding));
-        targetContext.save();
-        targetContext.translate(x,y);
-        targetContext.rotate((textObject.rotation||0)*Math.PI/180);
-        // Thin overlapping slices avoid hairline seams at print resolution.
-        for(let column=0;column<width;column+=2) {
-            const u=(column+1)/width;
-            const offset=rise*Math.pow(2*u-1,2);
-            const slope=4*rise*(2*u-1)/width;
-            targetContext.save();
-            targetContext.translate(column,baseline-y+offset);
-            targetContext.rotate(Math.atan(slope));
-            targetContext.drawImage(nameCanvas,x+column,top,Math.min(3,width-column),bottom-top,
-                0,top-baseline,Math.min(3,width-column),bottom-top);
-            targetContext.restore();
-        }
-        targetContext.restore();
+    function pointOnNamePath(points,t) {
+        const u=1-t;
+        const x=u*u*u*points[0][0]+3*u*u*t*points[1][0]+3*u*t*t*points[2][0]+t*t*t*points[3][0];
+        const y=u*u*u*points[0][1]+3*u*u*t*points[1][1]+3*u*t*t*points[2][1]+t*t*t*points[3][1];
+        const dx=3*u*u*(points[1][0]-points[0][0])+6*u*t*(points[2][0]-points[1][0])+3*t*t*(points[3][0]-points[2][0]);
+        const dy=3*u*u*(points[1][1]-points[0][1])+6*u*t*(points[2][1]-points[1][1])+3*t*t*(points[3][1]-points[2][1]);
+        return {x,y,angle:Math.atan2(dy,dx)};
+    }
+    writeText = function(textObject,context) {
+        const curve=textObject.hearthstoneCurve;
+        if(!curve || curve.version!==2) return writeFlatText(textObject,context);
+        // Keep the shared replacement engine available for advanced title codes.
+        // Rules, costs, stats and every other text box always use that engine.
+        if(/[{}]/.test(textObject.text)) return writeFlatText(textObject,context);
+        const width=scaleWidth(textObject.width),height=scaleHeight(textObject.height);
+        const points=curve.points.map(([x,y])=>[x*width,y*height]);
+        const path=Array.from({length:1001},(_,i)=>pointOnNamePath(points,i/1000));
+        let length=0;
+        path.forEach((p,i)=>{if(i) length+=Math.hypot(p.x-path[i-1].x,p.y-path[i-1].y);p.distance=length;});
+        const center=path[Math.round(curve.middle*1000)].distance;
+        const maxWidth=width*curve.maxWidth;
+        const letters=Array.from(new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(textObject.text),s=>s.segment);
+        let size=scaleHeight(textObject.size)+parseInt(textObject.fontSize||0);
+        let advances,total;
+        context.save();
+        do {
+            context.font=`${Math.max(1,size)}px "${textObject.font}"`;
+            const em=context.measureText('M').width;
+            advances=letters.map(char=>char===' '?em*0.25:context.measureText(char).width+em*0.035);
+            total=advances.reduce((sum,value)=>sum+value,0);
+            if(total<=maxWidth || size<=1) break;
+            size--;
+        } while(true);
+        context.translate(scaleX(textObject.x),scaleY(textObject.y));
+        context.rotate((textObject.rotation||0)*Math.PI/180);
+        context.textAlign='center';
+        context.textBaseline='middle';
+        context.lineJoin='round';
+        context.lineCap='round';
+        context.fillStyle=textObject.color||'white';
+        context.strokeStyle=textObject.outlineColor||'black';
+        context.lineWidth=size*0.11;
+        let distance=center-total/2,index=0;
+        letters.forEach((letter,i)=>{
+            const midpoint=distance+advances[i]/2;
+            while(index<path.length-1 && path[index].distance<midpoint) index++;
+            const p=path[index];
+            context.save();
+            context.translate(p.x,p.y);
+            context.rotate(p.angle);
+            context.strokeText(letter,0,0);
+            context.fillText(letter,0,0);
+            context.restore();
+            distance+=advances[i];
+        });
+        context.restore();
     };
+    function nameOptions(k) {
+        // Map Sunwell's 460x160 name path box into the existing CardForge ribbon.
+        // The asymmetric minion path is intentionally different from the spell.
+        const minion=k==='minion';
+        const ratio=minion?350/485:371/507;
+        const points=minion?[[0,88],[98,112],[294,13],[460,80]]:[[10,78],[170,36],[294,36],[450,80]];
+        return {
+            x:((minion?75-96*ratio:64.5-80*ratio)+105*ratio-20+(minion?1:-2.5))/460,
+            y:((minion?323-469*ratio:316-457*ratio)+452*ratio+(minion?-3.5:4))/644,
+            width:ratio,height:160*ratio/644,size:(minion?44:42)*ratio/644,
+            font:'hearthstone-name',outlineColor:'black',rotation:0,
+            hearthstoneCurve:{version:2,middle:minion?0.55:0.49,maxWidth:450/460,
+                points:points.map(([x,y])=>[x/460,y/160])}
+        };
+    }
     const settings = () => {
         const state={...defaults, ...(card.hearthstone || {})};
         if(state.kind && state.kind!==kind) {
@@ -143,7 +181,7 @@ var Hearthstone = window.Hearthstone || (() => {
         const display={font:'hearthstone-title',color:'white',outlineWidth:2/644,outlineColor:'#241c18',oneLine:true,align:'center'};
         const oldPT = !card.text?.power && card.text?.pt?.text.match(/^\s*([^/]+)\/([^/]+)\s*$/);
         const textOptions = {
-            title:box('Title',98,k==='minion'?337:343,302,45,29,{...display,rotation:k==='minion'?-3:0,hearthstoneCurve:{rise:(k==='minion'?11:16)/644}}),
+            title:{name:'Title',text:'',...display,...nameOptions(k)},
             mana:box('Mana cost',45,67,88,75,65,display),
             type:box('Type / tribe',153,572,204,29,21,display),
             rules:box('Rules Text',116,k==='minion'?423:435,270,k==='minion'?124:112,27,{font:'hearthstone-rules',align:'center',justify:'center',lineSpacing:0.05}),
@@ -225,10 +263,15 @@ var Hearthstone = window.Hearthstone || (() => {
         await fonts();
         if(!card.version.startsWith('hearthstone-')) return;
         kind=card.hearthstone?.kind || card.version.slice('hearthstone-'.length);
-        // Upgrade the original straight title while retaining edited placement.
-        if(card.text.title && !card.text.title.hearthstoneCurve) {
-            card.text.title.hearthstoneCurve={rise:(kind==='minion'?11:16)/644};
-            if(kind==='spell' && card.text.title.rotation===-3) card.text.title.rotation=0;
+        // Upgrade prior default typography while retaining deliberate placement edits.
+        if(card.text.title?.hearthstoneCurve?.version!==2) {
+            const title=card.text.title,options=nameOptions(kind);
+            if(title) {
+                const oldX=78/460,oldY=(kind==='minion'?337:343)/644;
+                const dx=(title.x??oldX)-oldX,dy=(title.y??oldY)-oldY;
+                const position=title.font==='hearthstone-name'?{x:title.x,y:title.y,width:title.width,height:title.height}:{x:options.x+dx,y:options.y+dy};
+                Object.assign(title,options,position);
+            }
         }
         // Loading a save must not reset text, component positions, art or margins.
         document.querySelector('#selectFrameGroup').value='Hearthstone';

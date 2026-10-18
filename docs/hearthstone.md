@@ -17,7 +17,7 @@ oval portrait and `minion-dragon`; spells use the spell surround and
 uncheck it before building, or remove its layer afterwards.
 
 **Text** provides Title, Mana cost, Type / tribe (for example Beast or Nature),
-Rules Text and, for minions, separate Power and Toughness fields. Names follow the curve of the minion or spell ribbon; normal text formatting and automatic shrinking for long names still apply. Existing Hearthstone saves acquire the curved title when reopened. Cost and stats
+Rules Text and, for minions, separate Power and Toughness fields. Names use Belwe Bd BT Bold, with individually rotated letters along distinct minion and spell Bézier paths. Long names shrink to fit. Existing Hearthstone saves acquire the corrected typography when reopened. Cost and stats
 accept plain numbers. Rules use the standard Card Conjurer replacement engine:
 `{t}`, `{untap}`, `{w}`, `{u}`, `{b}`, `{r}`, `{g}`, hybrid mana, `{bold}…{/bold}`,
 italics and other normal commands remain available. Existing title, cost, type,
@@ -91,3 +91,23 @@ Browser screenshots: [minion editor](images/hearthstone-editor-minion.png),
 Curved-name checks: `python tests/hearthstone_names_browser.py` verifies short and
 long names stay inside both ribbons, and that upgrading an older save retains
 its edited title placement. [Name screenshots](images/hearthstone-curved-names.jpg).
+
+## Original-card typography reference
+
+The title font was checked against original
+[Keeper of the Grove](https://raw.githubusercontent.com/schmich/hearthstone-card-images/master/cards/en_US/601.png)
+and [Fireball](https://raw.githubusercontent.com/schmich/hearthstone-card-images/master/cards/en_US/315.png)
+card images (Blizzard Entertainment, mirrored by schmich/hearthstone-card-images).
+[Side-by-side comparison](images/hearthstone-original-name-comparison.jpg).
+
+The minion and spell cubic path coordinates come from HearthSim/Sunwell's
+`MinionCard.ts`, `SpellCard.ts`, and `Components/NameBanner.ts`, with placement
+mapped to the existing ribbon assets and calibrated against those original cards.
+The Sunwell MIT license is included as `img/frames/hearthstone/LICENSE-Sunwell.txt`.
+Names now render as individual glyphs; the earlier raster-strip bend was removed.
+
+The Belwe font is sourced from wnr/firestone-view, `asset/font/belwe-bd-bt-bold.ttf`.
+Its embedded family is **Belwe Bd BT**, style **Bold**. See
+`fonts/hearthstone/NOTICE.txt`; the font is not covered by the source projects'
+MIT licenses. The previous AR LisuGB Medium font remains for the other existing
+Hearthstone text fields. MtG replacements in rules text use the shared renderer.

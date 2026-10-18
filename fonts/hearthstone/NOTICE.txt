@@ -1,0 +1,7 @@
+Belwe-Bold.ttf identifies itself as Belwe Bd BT Bold.
+Source: https://github.com/wnr/firestone-view/blob/master/asset/font/belwe-bd-bt-bold.ttf
+This is a proprietary Bitstream font, not covered by CardForge's or Sunwell's MIT license.
+Original font copyright and naming records remain embedded in the font file.
+
+GBJenLei-Medium.woff2 and FranklinGothic-MediumCond.woff2 were sourced from CardForge.
+See img/frames/hearthstone/LICENSE-CardForge.txt and docs/hearthstone.md for attribution.

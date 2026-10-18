@@ -15,6 +15,7 @@ async def main():
   await page.wait_for_function("typeof card!=='undefined' && card.text")
   await page.select_option('#selectFrameGroup','Hearthstone')
   await page.wait_for_function("card.version==='hearthstone-minion'")
+  assert await page.evaluate("document.fonts.check('12px hearthstone-name') && card.text.title.font==='hearthstone-name'")
   for kind,pack in [('minion','HearthstoneMinion'),('spell','HearthstoneSpell')]:
    if kind=='spell':
     await page.select_option('#selectFramePack',pack)
