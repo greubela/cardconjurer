@@ -1,0 +1,569 @@
+{
+  "full_run": {
+    "classes": 24,
+    "symbols": [
+      "t",
+      "g"
+    ],
+    "bleed": "1/8 inch; all four strips and trim corners opaque black",
+    "save_reload": "text, art, positions, layer opacity, settings preserved",
+    "png_download": [
+      2211,
+      3015
+    ],
+    "mobile_width": 390,
+    "page_errors": [],
+    "failed_extension_requests": []
+  },
+  "final_focused_run": {
+    "classes": 6,
+    "symbols": [
+      "t",
+      "g"
+    ],
+    "bleed": "1/8 inch; all four strips and trim corners opaque black",
+    "save_reload": "text, art, positions, layer opacity, settings preserved",
+    "png_download": [
+      2211,
+      3015
+    ],
+    "mobile_width": 390,
+    "page_errors": [],
+    "failed_extension_requests": []
+  },
+  "additional_checks": "PASS: spell stat controls disabled; minion stat controls restored; MtG 3/5 imported and retained",
+  "curved_name_run": {
+    "classes": 6,
+    "symbols": [
+      "t",
+      "g"
+    ],
+    "bleed": "1/8 inch; all four strips and trim corners opaque black",
+    "save_reload": "text, art, positions, layer opacity, settings preserved",
+    "png_download": [
+      2211,
+      3015
+    ],
+    "mobile_width": 390,
+    "page_errors": [],
+    "failed_extension_requests": []
+  },
+  "curved_name_checks": "PASS: short, normal and long names fit minion/spell ribbons; legacy saves retain edited title placement",
+  "original_typography_run": {
+    "classes": 6,
+    "symbols": [
+      "t",
+      "g"
+    ],
+    "bleed": "1/8 inch; all four strips and trim corners opaque black",
+    "save_reload": "text, art, positions, layer opacity, settings preserved",
+    "png_download": [
+      2211,
+      3015
+    ],
+    "mobile_width": 390,
+    "page_errors": [],
+    "failed_extension_requests": []
+  },
+  "original_typography_checks": {
+    "font": "Belwe Bd BT Bold; verified embedded font metadata and browser font loading",
+    "references": [
+      "Keeper of the Grove (601)",
+      "Fireball (315)",
+      "HearthSim/Sunwell name paths"
+    ],
+    "glyphs": "Individually drawn and tangent-rotated; raster-strip deformation removed",
+    "short_long_names": "PASS on minion and spell ribbons",
+    "legacy_placement": "PASS"
+  },
+  "all_types_matrix": {
+    "types": [
+      "minion",
+      "spell",
+      "weapon",
+      "hero",
+      "location",
+      "hero-power",
+      "battleground-minion"
+    ],
+    "classes": [
+      "neutral",
+      "deathknight",
+      "demonhunter",
+      "druid",
+      "hunter",
+      "mage",
+      "paladin",
+      "priest",
+      "rogue",
+      "shaman",
+      "warlock",
+      "warrior"
+    ],
+    "combinations": 84,
+    "cases": [
+      {
+        "kind": "minion",
+        "class": "neutral",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "deathknight",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "demonhunter",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "druid",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "hunter",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "mage",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "paladin",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "priest",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "rogue",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "shaman",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "warlock",
+        "passed": true
+      },
+      {
+        "kind": "minion",
+        "class": "warrior",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "neutral",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "deathknight",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "demonhunter",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "druid",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "hunter",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "mage",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "paladin",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "priest",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "rogue",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "shaman",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "warlock",
+        "passed": true
+      },
+      {
+        "kind": "spell",
+        "class": "warrior",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "neutral",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "deathknight",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "demonhunter",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "druid",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "hunter",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "mage",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "paladin",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "priest",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "rogue",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "shaman",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "warlock",
+        "passed": true
+      },
+      {
+        "kind": "weapon",
+        "class": "warrior",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "neutral",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "deathknight",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "demonhunter",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "druid",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "hunter",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "mage",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "paladin",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "priest",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "rogue",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "shaman",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "warlock",
+        "passed": true
+      },
+      {
+        "kind": "hero",
+        "class": "warrior",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "neutral",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "deathknight",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "demonhunter",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "druid",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "hunter",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "mage",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "paladin",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "priest",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "rogue",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "shaman",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "warlock",
+        "passed": true
+      },
+      {
+        "kind": "location",
+        "class": "warrior",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "neutral",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "deathknight",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "demonhunter",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "druid",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "hunter",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "mage",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "paladin",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "priest",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "rogue",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "shaman",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "warlock",
+        "passed": true
+      },
+      {
+        "kind": "hero-power",
+        "class": "warrior",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "neutral",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "deathknight",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "demonhunter",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "druid",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "hunter",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "mage",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "paladin",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "priest",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "rogue",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "shaman",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "warlock",
+        "passed": true
+      },
+      {
+        "kind": "battleground-minion",
+        "class": "warrior",
+        "passed": true
+      }
+    ],
+    "full_resolution_types": 7,
+    "checks": [
+      "all class assets load",
+      "correct stat and text fields",
+      "no leaked alpha",
+      "all four black bleed strips and trim corners",
+      "MtG tap and mana symbols",
+      "fresh-page save/reload for every type",
+      "PNG download for every type",
+      "independent component removal",
+      "mobile controls for every type"
+    ],
+    "page_errors": [],
+    "failed_extension_requests": []
+  },
+  "all_types_regression": {
+    "classes": 6,
+    "symbols": [
+      "t",
+      "g"
+    ],
+    "bleed": "1/8 inch; all four strips and trim corners opaque black",
+    "save_reload": "text, art, positions, layer opacity, settings preserved",
+    "png_download": [
+      2211,
+      3015
+    ],
+    "mobile_width": 390,
+    "page_errors": [],
+    "failed_extension_requests": []
+  },
+  "component_asset_decoding": {
+    "minion": 37,
+    "spell": 35,
+    "weapon": 37,
+    "hero": 35,
+    "location": 35,
+    "hero-power": 28,
+    "battleground-minion": 42,
+    "result": "PASS"
+  },
+  "cross_type_load_guard": "PASS: Hero Power save loads while the last minion text field is selected",
+  "all_type_long_names": "PASS: glyph centers progress along the path on all seven layouts"
+}

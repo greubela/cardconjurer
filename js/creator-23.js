@@ -4533,6 +4533,8 @@ async function loadCard(selectedCardKey) {
 	card = JSON.parse(localStorage.getItem(selectedCardKey));
 	//if the card was loaded properly...
 	if (card) {
+		// A saved layout may have fewer text boxes than the active card.
+		selectedTextIndex = 0;
 		//load values from card into html inputs
 		document.querySelector('#info-number').value = card.infoNumber;
 		document.querySelector('#info-rarity').value = card.infoRarity;
